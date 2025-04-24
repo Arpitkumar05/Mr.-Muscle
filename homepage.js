@@ -22,8 +22,8 @@ const auth = getAuth();
 const db = getFirestore();
 
 const state = {
-  hp: 3,
-  rank: 0,
+  hp: 3.0,
+  rank: 0.0,
   streak: 0,
   tasksDone: new Set(),
   timer: null,
@@ -45,13 +45,11 @@ const el = {
   streakValue: document.getElementById('streak-value')
 };
 
-// Helper: Convert numeric rank to letter
-function getRankLetter(rank) {
+function getRankLetter(rankIndex) {
   const ranks = ['Z', 'Y', 'X', 'W', 'V', 'U', 'T', 'S', 'R', 'Q', 'P', 'O', 'N', 'M', 'L', 'K', 'J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'];
-  return ranks[Math.min(rank, ranks.length - 1)];
+  return ranks[Math.min(rankIndex, ranks.length - 1)];
 }
 
-// Populate user info after auth
 onAuthStateChanged(auth, async user => {
   const loggedInUserId = localStorage.getItem('loggedInUserId');
   if (!loggedInUserId) return console.log("User Id not Found in Local storage");
@@ -72,7 +70,6 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-// Logout
 document.getElementById('logout').addEventListener('click', () => {
   localStorage.removeItem('loggedInUserId');
   signOut(auth)
@@ -80,15 +77,15 @@ document.getElementById('logout').addEventListener('click', () => {
     .catch(err => console.error('Error signing out:', err));
 });
 
-// State persistence
 function loadState() {
   const saved = JSON.parse(localStorage.getItem('dailyQuest')) || {};
-  state.hp = saved.hp ?? 3;
-  state.rank = saved.rank ?? 0;
+  state.hp = saved.hp ?? 3.0;
+  state.rank = saved.rank ?? 0.0;
   state.streak = saved.streak ?? 0;
   state.tasksDone = new Set(saved.tasksDone || []);
   updateUI();
 }
+
 function saveState() {
   localStorage.setItem('dailyQuest', JSON.stringify({
     hp: state.hp,
@@ -98,23 +95,19 @@ function saveState() {
   }));
 }
 
-// Update UI from state
 function updateUI() {
   el.hpBar.style.width = `${(state.hp / 3) * 100}%`;
-  el.rankBar.style.width = `${(state.rank / 5) * 100}%`;
-  el.hpText.textContent = `${state.hp}/3`;
-  el.rankText.textContent = `${state.rank}/5`;
-
-  el.currentRank.textContent = getRankLetter(state.rank);
+  el.rankBar.style.width = `${Math.min(state.rank * 100, 100)}%`;
+  el.hpText.textContent = `${state.hp.toFixed(1)}/3`;
+  el.rankText.textContent = `${(state.rank * 100).toFixed(0)}%`;
+  el.currentRank.textContent = getRankLetter(Math.floor(state.rank * 26));
   el.streakValue.textContent = state.streak;
-
   el.taskCards.forEach(card => {
     const id = card.dataset.taskId;
     card.classList.toggle('completed', state.tasksDone.has(id));
   });
 }
 
-// Task toggling
 el.taskCards.forEach(card => {
   card.addEventListener('click', () => {
     if (!state.timer) return;
@@ -127,7 +120,6 @@ el.taskCards.forEach(card => {
   });
 });
 
-// Timer
 function startTimer() {
   el.startBtn.textContent = 'Complete Quest';
   state.timer = setInterval(() => {
@@ -141,6 +133,7 @@ function startTimer() {
     }
   }, 1000);
 }
+
 function resetTimer() {
   clearInterval(state.timer);
   state.timer = null;
@@ -149,31 +142,40 @@ function resetTimer() {
   el.startBtn.textContent = 'Start Your Quest';
 }
 
-// Quest logic
 function completeQuest() {
   clearInterval(state.timer);
   if (state.tasksDone.size === 4) {
-    state.rank++;
+    if (state.rank < 1) {
+      state.rank = Math.min(1, state.rank + 1 / 26);
+    }
+    if (state.hp < 3) {
+      state.hp = Math.min(3, state.hp + 1 / 20 * 3);
+    }
     state.streak++;
-    if (state.rank >= 5) return rankUp();
+    if (state.rank >= 1 && state.rank < 1.01) return rankUp();
   } else {
-    state.hp--;
-    state.streak = 0;
-    if (state.hp <= 0) return showModal();
+    if (state.rank < 1) {
+      state.hp = Math.max(state.hp - 1, 0);
+      state.streak = 0;
+      if (state.hp <= 0) return showModal();
+    }
   }
   postQuestReset();
 }
 
 function rankUp() {
-  state.rank = 0;
-  state.hp = 3;
+  state.rank = 1.01;
   alert('🎉 Congratulations, you ranked up!');
   postQuestReset();
 }
 
 function failQuest() {
   state.streak = 0;
-  showModal();
+  if (state.rank < 1) {
+    state.hp = Math.max(state.hp - 1, 0);
+    if (state.hp <= 0) showModal();
+  }
+  postQuestReset();
 }
 
 function showModal() {
@@ -195,10 +197,8 @@ function postQuestReset() {
   updateUI();
 }
 
-// Start/complete button
 el.startBtn.addEventListener('click', () => {
   state.timer ? completeQuest() : startTimer();
 });
 
-// Initialize
 loadState();
