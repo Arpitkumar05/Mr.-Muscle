@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="bmi.css">
+    <link rel="stylesheet" href="NutriCalc.css">
+    <link rel="stylesheet" href="mealGuide.css">
+    <link rel="stylesheet" href="footer.css">
+    <link rel="stylesheet" href="home-bg.css">
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        text-decoration: none;
+        list-style: none;
+        border: none;
+        outline: none;
+        scroll-behavior: smooth;
+        font-family: -apple-system, sans-serif;
+    }
+
+    :root {
+        --bg-color: #000;
+        --snd-bg-color: #111;
+        --text-color: #fff;
+        --main-color: #e20e12;
+    }
+
+    body {
+        background: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    header {
+        position: fixed;
+        width: 100%;
+        top: 0;
+        right: 0;
+        z-index: 1000;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 9%;
+        background: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(10px);
+    }
+
+    header span{
+        color: var(--main-color);
+    }
+
+    section {
+    padding: 5rem 9% 2rem; /* Reduced top padding */
+    display: flex; /* Better vertical centering */
+    align-items: center;
+}
+
+    .logo {
+        font-size: 2.5rem;
+        color: var(--text-color);
+        font-weight: 800;
+    }
+
+    .navbar {
+        display: flex;
+        align-items: center;
+    }
+
+    .navbar a {
+        font-size: 1.4rem;
+        font-weight: 500;
+        color: var(--text-color);
+        margin-left: 2rem;
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
+    }
+
+    .navbar a:hover,
+    .navbar a.active {
+        color: var(--main-color);
+        border-bottom: 3px solid var(--main-color);
+    }
+
+    .nav-btn {
+        display: inline-block;
+        padding: 0.6rem 1.5rem;
+        background: transparent;
+        color: var(--main-color);
+        border: 2px solid var(--main-color);
+        border-radius: 0.8rem;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-left: 3rem;
+        transition: all 0.5s ease;
+    }
+
+    .nav-btn:hover {
+        background: var(--main-color);
+        color: var(--text-color);
+        transform: scale(1.05);
+    }
+
+    #menu-icon {
+        font-size: 3rem;
+        color: var(--main-color);
+        cursor: pointer;
+        display: none;
+    }
+
+    .home {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 4rem;
+    }
+
+    .home-content {
+        flex: 1;
+    }
+
+    .home-content h3 {
+        font-size: 3.5rem;
+        font-weight: 700;
+    }
+
+    .home-content h1 {
+        font-size: 4.5rem;
+        font-weight: 700;
+        line-height: 1.2;
+        margin: 1rem 0;
+    }
+
+    .home-content span {
+        font-size: 3rem;
+        color: var(--main-color);
+    }
+
+    .home-img img {
+        max-width: 500px;
+        width: 100%;
+        animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-1.5rem); }
+    }
+
+    .home-content p {
+        font-size: 1.6rem;
+        margin: 2rem 0 3rem;
+        max-width: 600px;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 1rem 2.5rem;
+        background: var(--main-color);
+        border-radius: 0.8rem;
+        font-size: 1.6rem;
+        color: var(--text-color);
+        font-weight: 600;
+    }
+
+
+    
+
+    @media (max-width: 1200px) {
+        html {
+            font-size: 55%;
+        }
+    }
+
+    @media (max-width: 991px) {
+        .home {
+            flex-direction: column;
+            padding: 15rem 3% 6rem;
+        }
+
+        .home-content {
+            order: 2;
+            text-align: center;
+        }
+
+        .home-img img {
+            width: 70vw;
+            margin-top: 3rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .navbar {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            padding: 1rem 3%;
+            background: var(--bg-color);
+            display: none;
+        }
+
+        .navbar.active {
+            display: block;
+        }
+
+        .navbar a {
+            display: block;
+            margin: 3rem 0;
+            text-align: center;
+        }
+
+        #menu-icon {
+            display: block;
+            font-size: 3.6rem;
+        }
+    }
+
+    /* Mobile Adjustments */
+
+    @media (max-width: 768px) {
+    /* Adjust Home Section for Mobile */
+    .home {
+        flex-direction: column;
+        padding: 8rem 3% 3rem;  /* Reduced top padding to bring content closer */
+    }
+    .home-content {
+        text-align: center;
+        margin-bottom: 2rem;  /* Reduced gap between text and image */
+    }
+    .home-img img {
+        width: 50vw;      /* Reduced image width */
+        margin-top: 1rem; /* Reduced gap between image and text */
+    }
+
+    /* Center the Nutrition Calculator container */
+    .nutrition-calculator .container {
+        padding: 2rem 3%;
+        margin: 0 auto;  /* Centers the container horizontally */
+    }
+}
+
+
+
+    </style>
+    <title>Mr Muscle Tracker</title>
+</head>
+<body>
+    <header>
+        <a href="#" class="logo">Mr. <span>Muscle</span></a>
+        <i class='bx bx-menu' id="menu-icon"></i>
+        <nav class="navbar">
+            <a href="#home">Home</a>
+            <a href="#bmi">BMI Calc</a>
+            <a href="#nutrition">Nutri Calc</a>
+            <a href="#meal-guide">Meal Guide</a>
+        </nav>
+        <a href="#" class="nav-btn">Beginner <i class='bx bxs-crown' ></i></a>
+    </header>
+
+    <section class="home" id="home">
+        <div class="home-content">
+            <h3>Build Your</h3>
+            <h1>Dream Physique</h1>
+            <h3><span>Bodybuilding</span></h3>
+            <p>Transform your body with our expert training programs and by Completing Your Daily Quest. <br> Start your journey today!</p>
+            <a href="login.html" class="btn">Start New Quest</a>
+        </div>
+        <div class="home-img">
+            <img src="assets/1.png" alt="Fitness illustration">
+        </div>
+    </section>
+
+    <section class="bmi-calculator" id="bmi">
+        <div class="container">
+            <h2>BMI Calculator</h2>
+            <label for="weight">Weight (kg):</label>
+            <input type="number" id="weight" placeholder="Enter weight" required>
+            <label for="height">Height (cm):</label>
+            <input type="number" id="height" placeholder="Enter height" required>
+            <button onclick="calculateBMI()">Calculate BMI</button>
+            <div class="result" id="result"></div>
+        </div>
+    </section>
+
+    <section class="nutrition-calculator" id="nutrition">
+        <div class="container">
+            <div class="nutrition-form">
+                <h2 style="text-align: center; margin-bottom: 3rem; font-size: 2.8rem;">Nutrition Calculator</h2>
+                <div class="form-group">
+                    <label>Weight (kg)</label>
+                    <input type="number" id="nutri-weight" required>
+                </div>
+                <div class="form-group">
+                    <label>Height (cm)</label>
+                    <input type="number" id="nutri-height" required>
+                </div>
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" id="age" required>
+                </div>
+                <div class="form-group">
+                    <label>Activity Level</label>
+                    <select id="activity-level">
+                        <option value="1.2">Sedentary</option>
+                        <option value="1.375">Light Exercise</option>
+                        <option value="1.55">Moderate Exercise</option>
+                        <option value="1.725">Heavy Exercise</option>
+                        <option value="1.9">Athlete</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Goal</label>
+                    <select id="goal">
+                        <option value="loss">Weight Loss</option>
+                        <option value="maintain">Maintain Weight</option>
+                        <option value="gain">Muscle Gain</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="calculateNutrition()" style="width: 100%; margin-top: 2rem;">Calculate</button>
+                
+                <div class="nutrition-result" id="nutrition-result">
+                    <div class="nutrient-card">
+                        <i class='bx bx-calorie'></i>
+                        <div class="nutrient-value" id="calories">0</div>
+                        <div class="nutrient-label">Calories/day</div>
+                    </div>
+                    <div class="nutrient-card">
+                        <i class='bx bx-dumbbell'></i>
+                        <div class="nutrient-value" id="protein">0g</div>
+                        <div class="nutrient-label">Protein</div>
+                    </div>
+                    <div class="nutrient-card">
+                        <i class='bx bx-bowl-rice'></i>
+                        <div class="nutrient-value" id="carbs">0g</div>
+                        <div class="nutrient-label">Carbs</div>
+                    </div>
+                    <div class="nutrient-card">
+                        <i class='bx bx-water'></i>
+                        <div class="nutrient-value" id="fat">0g</div>
+                        <div class="nutrient-label">Fat</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Meal Guide Section -->
+
+    <section class="meal-guide" id="meal-guide">
+        <div class="meal-container">
+            <div class="meal-header">
+                <h2><i class='bx bx-bowl-hot'></i>Your Personalized Meal Guide</h2>
+                <select class="goal-selector" id="meal-goal">
+                    <option value="gain" style="color: white;">Muscle Building</option>
+                    <option value="lose" style="color: white;">Fat Loss</option>
+                </select>
+            </div>
+            
+            <div class="meal-grid" id="meal-grid"></div>
+            <button class="refresh-btn" onclick="generateMeals()"><i class='bx bx-refresh'></i> New Combinations</button>
+        </div>
+    </section>
+
+    <script>
+        // Toggle Mobile Menu
+        const menuIcon = document.querySelector('#menu-icon');
+        const navbar = document.querySelector('.navbar');
+
+        menuIcon.onclick = () => {
+            navbar.classList.toggle('active');
+        }
+
+        // BMI Calculator
+        function calculateBMI() {
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value) / 100;
+            
+            if (weight && height) {
+                const bmi = (weight / (height * height)).toFixed(1);
+                let category = '';
+                
+                if (bmi < 18.5) category = 'Underweight';
+                else if (bmi < 24.9) category = 'Normal weight';
+                else if (bmi < 29.9) category = 'Overweight';
+                else category = 'Obese';
+                
+                document.getElementById('result').innerHTML = `Your BMI: ${bmi} (${category})`;
+            } else {
+                document.getElementById('result').innerHTML = 'Please enter valid values';
+            }
+        }
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+
+    <!-- Nutrition Calc Script -->
+
+<script>
+    // Add this nutrition calculation function
+    function calculateNutrition() {
+        const weight = parseFloat(document.getElementById('nutri-weight').value);
+        const height = parseFloat(document.getElementById('nutri-height').value);
+        const age = parseFloat(document.getElementById('age').value);
+        const activity = parseFloat(document.getElementById('activity-level').value);
+        const goal = document.getElementById('goal').value;
+
+        // BMR Calculation (Mifflin-St Jeor Equation)
+        const bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+        const tdee = bmr * activity;
+
+        // Goal adjustment
+        let calories = tdee;
+        if(goal === 'loss') calories -= 500;
+        if(goal === 'gain') calories += 500;
+
+        // Macronutrient Calculation
+        const protein = (goal === 'gain') ? weight * 2.2 : weight * 1.8;
+        const fat = (calories * 0.25) / 9;
+        const carbs = (calories - (protein*4 + fat*9)) / 4;
+
+        // Update UI
+        document.getElementById('calories').textContent = Math.round(calories);
+        document.getElementById('protein').textContent = Math.round(protein) + 'g';
+        document.getElementById('carbs').textContent = Math.round(carbs) + 'g';
+        document.getElementById('fat').textContent = Math.round(fat) + 'g';
+    }
+
+    </script>
+
+    <!-- Meal Guide Script -->
+
+    <script>
+        const mealData = {
+            gain: {
+                breakfast: ['2 Eggs + Oats Porridge', 'Paneer Paratha + Curd', 'Moong Dal Chilla + Peanut Chutney'],
+                lunch: ['Brown Rice + Chicken Curry + Salad', '3 Roti + Palak Paneer + Dal', 'Quinoa Khichdi + Boiled Eggs'],
+                snack: ['Banana Shake + Almonds', 'Sprouts Chaat', 'Protein Ladoo (2 pcs)'],
+                dinner: ['Grilled Fish + Stir-fry Veggies', 'Soya Curry + 2 Roti', 'Dal Khichdi + Raita']
+            },
+            lose: {
+                breakfast: ['Moong Dal Chilla + Green Chutney', 'Vegetable Omelette + Herbal Tea', 'Oats Upma with Vegetables'],
+                lunch: ['2 Roti + Lauki Sabzi + Dal', 'Grilled Chicken Salad', 'Quinoa Salad with Boiled Eggs'],
+                snack: ['Cucumber Slices with Hummus', 'Buttermilk + Roasted Chana', 'Green Tea + Mixed Nuts (10g)'],
+                dinner: ['Steamed Fish + Stir-fry Veggies', 'Vegetable Khichdi + Raita', 'Dal Soup + Grilled Paneer']
+            }
+        };
+        
+        function generateMeals() {
+            const goal = document.getElementById('meal-goal').value;
+            const categories = ['breakfast', 'lunch', 'snack', 'dinner'];
+            
+            const meals = categories.map(category => ({
+                category: category.charAt(0).toUpperCase() + category.slice(1),
+                items: mealData[goal][category].sort(() => 0.5 - Math.random()).slice(0, 3)
+            }));
+        
+            const mealGrid = document.getElementById('meal-grid');
+            mealGrid.innerHTML = meals.map(meal => `
+                <div class="meal-card">
+                    <h3>${meal.category} <i class='bx bx-bowl-rice'></i></h3>
+                    <ul>
+                        ${meal.items.map(item => `<li><i class='bx bx-check'></i> ${item}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+        
+        // Initial generation and event listener
+        generateMeals();
+        document.getElementById('meal-goal').addEventListener('change', generateMeals);
+        </script>
+
+
+<!--JavaScript for smooth scrolling and mobile menu close -->
+<script>
+    // Enhanced smooth scroll functionality
+    document.querySelectorAll('.navbar a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+            
+            if(targetSection) {
+                targetSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+
+                // Close mobile menu after clicking
+                if(window.innerWidth <= 768) {
+                    navbar.classList.remove('active');
+                }
+            }
+        });
+    });
+
+    // Add active class to current section in view
+    window.addEventListener('scroll', () => {
+        const scrollPos = window.scrollY;
+        
+        document.querySelectorAll('section').forEach(section => {
+            const sectionTop = section.offsetTop - 100;
+            const sectionHeight = section.offsetHeight;
+            
+            if(scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
+                const id = section.getAttribute('id');
+                document.querySelectorAll('.navbar a').forEach(link => {
+                    link.classList.remove('active');
+                    if(link.getAttribute('href') === `#${id}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+
+<!-- Footer -->
+
+
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-col">
+            <h3>Mr. Muscle</h3>
+            <div class="footer-links">
+                <a href="#home">Home</a>
+                <a href="#bmi">BMI Calculator</a>
+                <a href="#nutrition">Nutrition Guide</a>
+            </div>
+        </div>
+        
+        <div class="footer-col">
+            <h3>Quick Links</h3>
+            <div class="footer-links">
+                <a href="login.html">Joint the Quest</a>
+            </div>
+        </div>
+        
+        <div class="footer-col">
+            <h3>Connect With Us</h3>
+            <div class="social-links">
+                <a href="#"><i class='bx bxl-instagram' style="color: white;"></i></a>
+                <a href="#"><i class='bx bxl-twitter' style="color: white;"></i></a>
+                <a href="#"><i class='bx bxl-linkedin' style="color: white;"></i></a>
+                <a href="#"><i class='bx bxl-google' style="color: white;"></i></a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer-bottom">
+        <p>&copy; 2025 Mr. Muscle. All rights reserved</p>
+    </div>
+</footer>
+</body>
+</html>

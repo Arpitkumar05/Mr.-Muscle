@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quest Progress</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(120deg, #1e3c72, #2a5298, #3b8d99);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            text-align: center;
+            animation: bgAnimation 10s infinite alternate;
+        }
+        @keyframes bgAnimation {
+            0% { background: linear-gradient(120deg, #1e3c72, #2a5298, #3b8d99); }
+            100% { background: linear-gradient(120deg, #3b8d99, #2a5298, #1e3c72); }
+        }
+        .container {
+            background: linear-gradient(45deg, black, transparent);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
+            width: 90%;
+            max-width: 500px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .start-btn {
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            color: white;
+            padding: 12px 25px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s ease-in-out;
+            display: block;
+            margin: 10px auto;
+        }
+        .start-btn:hover { background: linear-gradient(90deg, #0072ff, #00c6ff); transform: scale(1.1); }
+        .start-btn:disabled { background: grey; cursor: not-allowed; }
+        .progress-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 20px;
+            background: linear-gradient(90deg, #ff512f, #dd2476);
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-weight: bold;
+            transition: width 0.5s ease-in-out;
+        }
+        .task-list {
+            text-align: left;
+            margin-top: 20px;
+        }
+        .task {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .task:hover { background: rgba(0, 255, 255, 0.3); transform: scale(1.05); }
+        .task.completed { background: green; text-decoration: line-through; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>New Quest Begins!</h1>
+        <button class="start-btn" id="start-btn" onclick="startQuest()">Start Now</button>
+        <p id="message" class="hidden">Quest Started! Keep pushing forward! 💪</p>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar">0%</div>
+        </div>
+        <p id="level">Level: Beginner</p>
+        <p id="streak">Streak: 0 Days</p>
+        <div class="task-list">
+            <h3>Daily Tasks</h3>
+            <div id="tasks"></div>
+        </div>
+    </div>
+    
+    <script>
+        let progress = localStorage.getItem("progress") ? parseInt(localStorage.getItem("progress")) : 0;
+        let streak = localStorage.getItem("streak") ? parseInt(localStorage.getItem("streak")) : 0;
+        let startClicked = localStorage.getItem("started") === "true";
+        let tasks = [
+            { text: "Complete 10 push-ups", reward: 10 },
+            { text: "Run 2 km", reward: 15 },
+            { text: "Drink 3L Water", reward: 20 },
+            { text: "Read for 30 minutes", reward: 10 },
+            { text: "Meditate for 10 minutes", reward: 15 }
+        ];
+
+        document.getElementById("start-btn").disabled = startClicked;
+        generateTasks();
+        updateProgress();
+        updateStreak();
+
+        function startQuest() {
+            document.getElementById("message").classList.remove("hidden");
+            localStorage.setItem("started", "true");
+            document.getElementById("start-btn").disabled = true;
+            increaseProgress(5);
+        }
+
+        function generateTasks() {
+            let taskContainer = document.getElementById("tasks");
+            taskContainer.innerHTML = "";
+            tasks.forEach(task => {
+                let taskDiv = document.createElement("div");
+                taskDiv.classList.add("task");
+                taskDiv.innerHTML = `${task.text} <span>+${task.reward}%</span>`;
+                taskDiv.onclick = () => completeTask(taskDiv, task.reward);
+                taskContainer.appendChild(taskDiv);
+            });
+        }
+
+        function completeTask(task, amount) {
+            if (!task.classList.contains("completed")) {
+                task.classList.add("completed");
+                increaseProgress(amount);
+            }
+        }
+
+        function increaseProgress(amount) {
+            progress = Math.min(100, progress + amount);
+            localStorage.setItem("progress", progress);
+            updateProgress();
+            checkAchievements();
+        }
+
+        function updateProgress() {
+            let progressBar = document.getElementById("progress-bar");
+            progressBar.style.width = progress + "%";
+            progressBar.textContent = progress + "%";
+            document.getElementById("level").textContent = "Level: " + (progress < 40 ? "Beginner" : progress < 80 ? "Intermediate" : "Pro");
+        }
+
+        function updateStreak() {
+            let lastDate = localStorage.getItem("lastDate");
+            let today = new Date().toLocaleDateString();
+            if (lastDate !== today) {
+                streak++;
+                localStorage.setItem("streak", streak);
+                localStorage.setItem("lastDate", today);
+            }
+            document.getElementById("streak").textContent = "Streak: " + streak + " Days";
+        }
+
+        function checkAchievements() {
+            if (progress >= 100) alert("🎉 You've reached the Pro Level! Achievement Unlocked!");
+        }
+    </script>
+</body>
+</html>

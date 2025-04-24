@@ -1,0 +1,316 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, sans-serif;
+}
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #7b2ff7, #f107a3);
+    --primary-bg: rgba(255, 255, 255, 0.2);
+    --primary-label: #757575;
+    --primary-text: #07001f;
+    --input-bg: rgba(255, 255, 255, 0.1);
+    --input-border: #757575;
+    --icon-color: #7b2ff7;
+    --recover-link: #7b2ff7;
+    --message-gradient: linear-gradient(135deg, #7b2ff7, #f107a3);
+    --container-blur: blur(15px);
+}
+
+body.dark-mode {
+    --primary-gradient: linear-gradient(135deg, #1e1e1e, #3c3c3c);
+    --primary-bg: rgba(0, 0, 0, 0.5);
+    --primary-label: #bbb;
+    --primary-text: #fff;
+    --input-bg: rgba(0, 0, 0, 0.3);
+    --input-border: #aaa;
+    --icon-color: #f107a3;
+    --recover-link: #f107a3;
+    --message-gradient: linear-gradient(135deg, #333, #555);
+    --container-blur: blur(20px);
+}
+
+/* Background image with blur effect */
+body {
+    background: url('assets/background\ img.jpg') no-repeat center center/cover;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Adding a blurred overlay */
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2); /* Dark overlay */
+    backdrop-filter: blur(1px); /* Blur effect */
+    -webkit-backdrop-filter: blur(1px);
+    z-index: -1; /* Keeps it behind other content */
+}
+
+body.dark-mode {
+    background: url('your-dark-mode-image.jpg') no-repeat center center/cover;
+}
+
+body.dark-mode::before {
+    background: rgba(0, 0, 0, 0.4); /* Darker overlay for dark mode */
+}
+
+/* Logo Styling */
+.logo {
+    position: absolute;
+    top: 20px;
+    left: 30px;
+    font-size: 42px;
+    font-weight: 800;
+    color: white;
+}
+
+.container {
+    background: var(--primary-bg);
+    backdrop-filter: var(--container-blur);
+    -webkit-backdrop-filter: var(--container-blur);
+    width: 400px;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    transition: all 0.4s ease;
+}
+
+.container:hover {
+    transform: translateY(-5px);
+}
+
+.form-title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 1rem 0;
+    color: #f7f5f5;
+}
+
+form {
+    margin: 0 1rem;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInForm 0.8s forwards;
+}
+
+@keyframes fadeInForm {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.input-group {
+    position: relative;
+    margin: 1.2rem 0;
+}
+
+.input-group i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary-text);
+    opacity: 0.7;
+}
+
+input {
+    width: 100%;
+    padding: 0.8rem 0.8rem 0.8rem 2.5rem;
+    background: var(--input-bg);
+    border: none;
+    border-bottom: 2px solid var(--input-border);
+    color: var(--primary-text);
+    font-size: 1rem;
+    border-radius: 5px;
+    transition: all 0.4s ease;
+}
+
+input:focus {
+    border-bottom: 2px solid var(--icon-color);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+input::placeholder {
+    color: transparent;
+}
+
+label {
+    position: absolute;
+    left: 2.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition: 0.3s ease;
+}
+
+input:focus ~ label,
+input:not(:placeholder-shown) ~ label {
+    top: -10px;
+    left: 0;
+    font-size: 0.75rem;
+    color: white;
+}
+
+button {
+    font-size: 1.1rem;
+    padding: 10px 0;
+    border-radius: 30px;
+    outline: none;
+    border: none;
+    width: 100%;
+    background: red;
+    color: white;
+    cursor: pointer;
+    transition: all 0.4s ease;
+}
+
+button:hover {
+    background: white;
+    color: red;
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.recover {
+    text-align: right;
+    margin: 0.5rem 0;
+}
+
+.recover a {
+    text-decoration: none;
+    color: #f7f5f5;
+    font-weight: 500;
+}
+
+.recover a:hover {
+    color: red;
+}
+
+.or {
+    text-align: center;
+    margin: 1rem 0;
+    position: relative;
+    color: var(--primary-text);
+}
+
+.or::before,
+.or::after {
+    content: "";
+    position: absolute;
+    width: 40%;
+    height: 1px;
+    background: #aaa;
+    top: 50%;
+}
+
+.or::before {
+    left: 0;
+}
+
+.or::after {
+    right: 0;
+}
+
+.icons {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.icons i {
+    color: red;
+    padding: 0.8rem;
+    font-size: 1.5rem;
+    border: 2px solid #ddd;
+    margin: 0 10px;
+    border-radius: 50%;
+    transition: all 0.4s ease;
+}
+
+.icons i:hover {
+    background: red;
+    color: #fff;
+    transform: scale(1.1);
+    border: 2px solid transparent;
+}
+
+.links {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+    font-weight: 500;
+}
+
+#signUpButton, #signInButton {
+    color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+#signUpButton:hover, #signInButton:hover {
+    text-decoration: underline;
+    color: red;
+}
+
+.messageDiv {
+    background: var(--message-gradient);
+    color: white;
+    padding: 10px 20px;
+    margin: 10px 0;
+    border-radius: 5px;
+    font-size: 0.95rem;
+    animation: fadeOut 7s forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Dark mode toggle button */
+.toggle-darkmode {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 6px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.toggle-darkmode:hover {
+    transform: scale(1.1);
+}
+
+.toggle-darkmode i {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.toggle-darkmode:hover i {
+    transform: rotate(15deg);
+}

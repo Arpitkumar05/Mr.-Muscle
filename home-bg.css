@@ -1,0 +1,23 @@
+/* ---------- Home Section Background Image Adjustment ---------- */
+/* Create a pseudo-element for the Home section background */
+.home {
+    position: relative; /* Needed for absolute positioning of the pseudo-element */
+    overflow: hidden;   /* Hide any overflow from the background element */
+}
+
+/* The ::before pseudo-element will hold the background image */
+.home::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Set your background image URL below. For example: url('your-image.jpg') */
+    background: url('assets/3.jpg') no-repeat center center/cover; 
+    opacity: 1;  /* Adjust this value for low opacity */
+    z-index: -1;   /* Place the background behind the Home content */
+    /* Optional: Add a dark gradient overlay to further match your dark theme */
+    background-color: rgba(0, 0, 0, 0.8);
+    background-blend-mode: multiply;
+}

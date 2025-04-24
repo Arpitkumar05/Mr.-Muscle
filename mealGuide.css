@@ -1,0 +1,79 @@
+.meal-guide {
+    position: relative;
+    padding: 6rem 0;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('assets/2.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.meal-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.meal-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.meal-header h2 {
+    font-size: 3rem;
+    color: var(--main-color);
+    margin-bottom: 1.5rem;
+}
+
+.goal-selector {
+    padding: 1rem 2rem;
+    font-size: 1.6rem;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: 2px solid var(--main-color);
+    width: 265px;
+}
+
+.meal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.meal-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--main-color);
+    backdrop-filter: blur(5px);
+    min-height: auto;
+}
+
+.meal-card h3 {
+    color: var(--main-color);
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+
+.meal-card ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.meal-card li {
+    margin: 0.6rem 0;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    line-height: 1.4;
+}
+
+.refresh-btn {
+    display: block;
+    margin: 2.5rem auto 0;
+    padding: 1rem 2.5rem;
+    background: var(--main-color);
+    font-size: 1.5rem;
+}
