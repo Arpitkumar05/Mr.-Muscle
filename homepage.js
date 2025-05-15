@@ -3,7 +3,7 @@ import {
   getAuth, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc
+  getFirestore, doc, getDoc, updateDoc, setDoc
 } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
 // Firebase config
@@ -27,8 +27,8 @@ const state = {
   streak: 0,
   tasksDone: new Set(),
   timer: null,
-  timeLeft: 10 * 60,  // in seconds
-  questDay: 1         // new: tracks which day’s quest you’re on
+  timeLeft: 10 * 60,
+  questDay: 1
 };
 
 const el = {
@@ -52,45 +52,88 @@ function getRankLetter(rankIndex) {
   return ranks[Math.min(rankIndex, ranks.length - 1)];
 }
 
-// Render push-ups/sit-ups/squats/run counts for today
+// Render task counts
 function renderTasks() {
   const reps = 5 * state.questDay;
-  const km   = (0.5 * state.questDay).toFixed(1);
-  const map  = { pushup: reps, situps: reps, squats: reps, run: km };
+  const km = (0.5 * state.questDay).toFixed(1);
+  const map = { pushup: reps, situps: reps, squats: reps, run: km };
   el.taskCards.forEach(card => {
     const id = card.dataset.taskId;
     card.querySelector('.task-count').textContent = map[id];
   });
 }
 
-// Load from localStorage
-function loadState() {
-  const saved = JSON.parse(localStorage.getItem('dailyQuest')) || {};
-  state.hp       = saved.hp ?? 3.0;
-  state.rank     = saved.rank ?? 0.0;
-  state.streak   = saved.streak ?? 0;
-  state.tasksDone = new Set(saved.tasksDone || []);
-  state.questDay = saved.questDay ?? 1;
+// Load quest state from Firestore
+async function loadState() {
+  const uid = localStorage.getItem('loggedInUserId');
+  if (!uid) return;
+
+  try {
+    const userDocRef = doc(db, "users", uid);
+    const userSnap = await getDoc(userDocRef);
+    if (userSnap.exists()) {
+      const data = userSnap.data();
+      const qs = data.questState || {};
+      state.hp = qs.hp ?? 3.0;
+      state.rank = qs.rank ?? 0.0;
+      state.streak = qs.streak ?? 0;
+      state.tasksDone = new Set(qs.tasksDone || []);
+      state.questDay = qs.questDay ?? 1;
+    }
+  } catch (err) {
+    console.error("Error loading quest state:", err);
+  }
+
   renderTasks();
   updateUI();
 }
 
-// Save to localStorage
-function saveState() {
-  localStorage.setItem('dailyQuest', JSON.stringify({
-    hp: state.hp,
-    rank: state.rank,
-    streak: state.streak,
-    tasksDone: [...state.tasksDone],
-    questDay: state.questDay
-  }));
+// Save quest state to Firestore
+async function saveState() {
+  const uid = localStorage.getItem('loggedInUserId');
+  if (!uid) return;
+
+  try {
+    const userRef = doc(db, "users", uid);
+    await updateDoc(userRef, {
+      questState: {
+        hp: state.hp,
+        rank: state.rank,
+        streak: state.streak,
+        tasksDone: [...state.tasksDone],
+        questDay: state.questDay
+      }
+    });
+  } catch (err) {
+    console.error("Error saving quest state:", err);
+  }
 }
 
-// Update all UI elements
+// Create new user data if not exists
+async function createUserIfNotExists(uid, email, firstName, lastName) {
+  const userDocRef = doc(db, "users", uid);
+  const snap = await getDoc(userDocRef);
+  if (!snap.exists()) {
+    await setDoc(userDocRef, {
+      email,
+      firstName,
+      lastName,
+      questState: {
+        hp: 3.0,
+        rank: 0.0,
+        streak: 0,
+        tasksDone: [],
+        questDay: 1
+      }
+    });
+  }
+}
+
+// Update UI elements
 function updateUI() {
-  el.hpBar.style.width   = `${(state.hp / 3) * 100}%`;
+  el.hpBar.style.width = `${(state.hp / 3) * 100}%`;
   el.rankBar.style.width = `${Math.min(state.rank * 100, 100)}%`;
-  el.hpText.textContent  = `${state.hp.toFixed(1)}/3`;
+  el.hpText.textContent = `${state.hp.toFixed(1)}/3`;
   el.rankText.textContent = `${(state.rank * 100).toFixed(0)}%`;
   el.currentRank.textContent = getRankLetter(Math.floor(state.rank * 26));
   el.streakValue.textContent = state.streak;
@@ -99,7 +142,7 @@ function updateUI() {
   });
 }
 
-// Auth & profile load
+// Handle auth + load profile + check/create user document
 onAuthStateChanged(auth, async user => {
   const uid = localStorage.getItem('loggedInUserId');
   if (!uid) return console.log("User Id not Found");
@@ -110,16 +153,19 @@ onAuthStateChanged(auth, async user => {
       document.getElementById('loggedUserFName').innerText = d.firstName;
       document.getElementById('loggedUserLName').innerText = d.lastName;
       document.getElementById('loggedUserEmail').innerText = d.email;
+      await createUserIfNotExists(uid, d.email, d.firstName, d.lastName);
+      await loadState();
     }
-  } catch(err) { console.error(err); }
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 // Logout
 document.getElementById('logout').addEventListener('click', () => {
   localStorage.removeItem('loggedInUserId');
-  signOut(auth)
-    .then(() => window.location.href = 'index.html')
-    .catch(err => console.error(err));
+  signOut(auth).then(() => window.location.href = 'index.html')
+               .catch(err => console.error(err));
 });
 
 // Task click toggles
@@ -127,9 +173,7 @@ el.taskCards.forEach(card => {
   card.addEventListener('click', () => {
     if (!state.timer) return;
     const id = card.dataset.taskId;
-    state.tasksDone.has(id)
-      ? state.tasksDone.delete(id)
-      : state.tasksDone.add(id);
+    state.tasksDone.has(id) ? state.tasksDone.delete(id) : state.tasksDone.add(id);
     updateUI();
     saveState();
   });
@@ -157,24 +201,16 @@ function resetTimer() {
   el.startBtn.textContent = 'Start Your Quest';
 }
 
-// When you finish clicking “Complete Quest”
+// Complete quest
 function completeQuest() {
   clearInterval(state.timer);
   if (state.tasksDone.size === el.taskCards.length) {
-    // success
-    if (state.rank < 1) {
-      state.rank = Math.min(1, state.rank + 1/26);
-    }
-    if (state.hp < 3) {
-      state.hp = Math.min(3, state.hp + (1/20 * 3));
-    }
+    if (state.rank < 1) state.rank = Math.min(1, state.rank + 1/26);
+    if (state.hp < 3) state.hp = Math.min(3, state.hp + (1/20 * 3));
     state.streak++;
-    state.questDay++;               // advance to next day’s quest
-    if (state.rank >= 1 && state.rank < 1.01) {
-      return rankUp();
-    }
+    state.questDay++;
+    if (state.rank >= 1 && state.rank < 1.01) return rankUp();
   } else {
-    // failed some tasks
     if (state.rank < 1) {
       state.hp = Math.max(state.hp - 1, 0);
       state.streak = 0;
@@ -187,15 +223,14 @@ function completeQuest() {
 // Rank-up handler
 function rankUp() {
   state.rank = 1.01;
-  state.questDay++;               // also advance quest day
-  // pulse the rank letter
+  state.questDay++;
   el.currentRank.classList.add('rank-up-animation');
   setTimeout(() => el.currentRank.classList.remove('rank-up-animation'), 800);
   alert('🎉 Congratulations, you ranked up!');
   postQuestReset();
 }
 
-// When timer hits zero
+// Timer fail
 function failQuest() {
   state.streak = 0;
   if (state.rank < 1) {
@@ -205,7 +240,7 @@ function failQuest() {
   postQuestReset();
 }
 
-// “Are you sure?” modal
+// Modal
 function showModal() {
   el.modal.classList.remove('hidden');
 }
@@ -217,19 +252,17 @@ el.noBtn.addEventListener('click', () => {
   el.modal.classList.add('hidden');
 });
 
-// Reset everything after quest ends
+// Reset
 function postQuestReset() {
   resetTimer();
   state.tasksDone.clear();
   saveState();
-  renderTasks();    // update next day’s counts
+  renderTasks();
   updateUI();
 }
 
-// Start or complete on button click
+// Start or complete
 el.startBtn.addEventListener('click', () => {
   state.timer ? completeQuest() : startTimer();
 });
 
-// Initialize
-loadState();
