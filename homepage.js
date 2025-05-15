@@ -27,9 +27,8 @@ const state = {
   streak: 0,
   tasksDone: new Set(),
   timer: null,
-  timeLeft: 10 * 60,
-  questDay: 1,
-  initialized: false
+  timeLeft: 10 * 60,  // in seconds
+  questDay: 1         // new: tracks which day’s quest you’re on
 };
 
 const el = {
@@ -47,11 +46,13 @@ const el = {
   streakValue: document.getElementById('streak-value')
 };
 
+// Ranks A–Z
 function getRankLetter(rankIndex) {
   const ranks = ['Z','Y','X','W','V','U','T','S','R','Q','P','O','N','M','L','K','J','I','H','G','F','E','D','C','B','A'];
   return ranks[Math.min(rankIndex, ranks.length - 1)];
 }
 
+// Render push-ups/sit-ups/squats/run counts for today
 function renderTasks() {
   const reps = 5 * state.questDay;
   const km   = (0.5 * state.questDay).toFixed(1);
@@ -62,9 +63,9 @@ function renderTasks() {
   });
 }
 
+// Load from localStorage
 function loadState() {
-  const uid = localStorage.getItem('loggedInUserId');
-  const saved = JSON.parse(localStorage.getItem(`dailyQuest_${uid}`)) || {};
+  const saved = JSON.parse(localStorage.getItem('dailyQuest')) || {};
   state.hp       = saved.hp ?? 3.0;
   state.rank     = saved.rank ?? 0.0;
   state.streak   = saved.streak ?? 0;
@@ -72,13 +73,11 @@ function loadState() {
   state.questDay = saved.questDay ?? 1;
   renderTasks();
   updateUI();
-  state.initialized = true;
 }
 
+// Save to localStorage
 function saveState() {
-  const uid = localStorage.getItem('loggedInUserId');
-  if (!uid) return;
-  localStorage.setItem(`dailyQuest_${uid}`, JSON.stringify({
+  localStorage.setItem('dailyQuest', JSON.stringify({
     hp: state.hp,
     rank: state.rank,
     streak: state.streak,
@@ -87,6 +86,7 @@ function saveState() {
   }));
 }
 
+// Update all UI elements
 function updateUI() {
   el.hpBar.style.width   = `${(state.hp / 3) * 100}%`;
   el.rankBar.style.width = `${Math.min(state.rank * 100, 100)}%`;
@@ -99,10 +99,10 @@ function updateUI() {
   });
 }
 
+// Auth & profile load
 onAuthStateChanged(auth, async user => {
-  if (!user) return;
-  const uid = user.uid;
-  localStorage.setItem('loggedInUserId', uid);
+  const uid = localStorage.getItem('loggedInUserId');
+  if (!uid) return console.log("User Id not Found");
   try {
     const docSnap = await getDoc(doc(db, "users", uid));
     if (docSnap.exists()) {
@@ -112,9 +112,9 @@ onAuthStateChanged(auth, async user => {
       document.getElementById('loggedUserEmail').innerText = d.email;
     }
   } catch(err) { console.error(err); }
-  loadState();
 });
 
+// Logout
 document.getElementById('logout').addEventListener('click', () => {
   localStorage.removeItem('loggedInUserId');
   signOut(auth)
@@ -122,6 +122,7 @@ document.getElementById('logout').addEventListener('click', () => {
     .catch(err => console.error(err));
 });
 
+// Task click toggles
 el.taskCards.forEach(card => {
   card.addEventListener('click', () => {
     if (!state.timer) return;
@@ -134,6 +135,7 @@ el.taskCards.forEach(card => {
   });
 });
 
+// Timer logic
 function startTimer() {
   el.startBtn.textContent = 'Complete Quest';
   state.timer = setInterval(() => {
@@ -155,25 +157,24 @@ function resetTimer() {
   el.startBtn.textContent = 'Start Your Quest';
 }
 
+// When you finish clicking “Complete Quest”
 function completeQuest() {
   clearInterval(state.timer);
   if (state.tasksDone.size === el.taskCards.length) {
+    // success
     if (state.rank < 1) {
       state.rank = Math.min(1, state.rank + 1/26);
     }
     if (state.hp < 3) {
       state.hp = Math.min(3, state.hp + (1/20 * 3));
     }
-    if (state.streak === 0) {
-      state.streak = 1;
-    } else {
-      state.streak++;
-    }
-    state.questDay++;
+    state.streak++;
+    state.questDay++;               // advance to next day’s quest
     if (state.rank >= 1 && state.rank < 1.01) {
       return rankUp();
     }
   } else {
+    // failed some tasks
     if (state.rank < 1) {
       state.hp = Math.max(state.hp - 1, 0);
       state.streak = 0;
@@ -183,15 +184,18 @@ function completeQuest() {
   postQuestReset();
 }
 
+// Rank-up handler
 function rankUp() {
   state.rank = 1.01;
-  state.questDay++;
+  state.questDay++;               // also advance quest day
+  // pulse the rank letter
   el.currentRank.classList.add('rank-up-animation');
   setTimeout(() => el.currentRank.classList.remove('rank-up-animation'), 800);
   alert('🎉 Congratulations, you ranked up!');
   postQuestReset();
 }
 
+// When timer hits zero
 function failQuest() {
   state.streak = 0;
   if (state.rank < 1) {
@@ -201,6 +205,7 @@ function failQuest() {
   postQuestReset();
 }
 
+// “Are you sure?” modal
 function showModal() {
   el.modal.classList.remove('hidden');
 }
@@ -212,14 +217,19 @@ el.noBtn.addEventListener('click', () => {
   el.modal.classList.add('hidden');
 });
 
+// Reset everything after quest ends
 function postQuestReset() {
   resetTimer();
   state.tasksDone.clear();
   saveState();
-  renderTasks();
+  renderTasks();    // update next day’s counts
   updateUI();
 }
 
+// Start or complete on button click
 el.startBtn.addEventListener('click', () => {
   state.timer ? completeQuest() : startTimer();
 });
+
+// Initialize
+loadState();
